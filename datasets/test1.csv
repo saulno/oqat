@@ -1,0 +1,10 @@
+size,color,class
+small,blue,yes
+medium,blue,yes
+medium,red,yes
+large,blue,yes
+small,red,no
+medium,green,no
+large,red,no
+large,green,no
+small,green,no

@@ -1,0 +1,475 @@
+Run
+Dataset: datesets/test2.csv
+Class column: class
+Positive class: perfect
+Learning fraction: 80
+Algorithm: Ants(10, 5)
+Dataset {
+    learning_pos: [
+        Row {
+            class: "perfect",
+            features: [
+                Str(
+                    "color",
+                    "red",
+                ),
+                Str(
+                    "size",
+                    "large",
+                ),
+                Str(
+                    "shape",
+                    "square",
+                ),
+            ],
+        },
+        Row {
+            class: "perfect",
+            features: [
+                Str(
+                    "color",
+                    "red",
+                ),
+                Str(
+                    "size",
+                    "medium",
+                ),
+                Str(
+                    "shape",
+                    "square",
+                ),
+            ],
+        },
+        Row {
+            class: "perfect",
+            features: [
+                Str(
+                    "color",
+                    "blue",
+                ),
+                Str(
+                    "size",
+                    "large",
+                ),
+                Str(
+                    "shape",
+                    "square",
+                ),
+            ],
+        },
+        Row {
+            class: "perfect",
+            features: [
+                Str(
+                    "color",
+                    "blue",
+                ),
+                Str(
+                    "size",
+                    "medium",
+                ),
+                Str(
+                    "shape",
+                    "square",
+                ),
+            ],
+        },
+        Row {
+            class: "perfect",
+            features: [
+                Str(
+                    "color",
+                    "blue",
+                ),
+                Str(
+                    "size",
+                    "small",
+                ),
+                Str(
+                    "shape",
+                    "circle",
+                ),
+            ],
+        },
+        Row {
+            class: "perfect",
+            features: [
+                Str(
+                    "color",
+                    "red",
+                ),
+                Str(
+                    "size",
+                    "small",
+                ),
+                Str(
+                    "shape",
+                    "square",
+                ),
+            ],
+        },
+        Row {
+            class: "perfect",
+            features: [
+                Str(
+                    "color",
+                    "red",
+                ),
+                Str(
+                    "size",
+                    "small",
+                ),
+                Str(
+                    "shape",
+                    "triangle",
+                ),
+            ],
+        },
+        Row {
+            class: "perfect",
+            features: [
+                Str(
+                    "color",
+                    "red",
+                ),
+                Str(
+                    "size",
+                    "small",
+                ),
+                Str(
+                    "shape",
+                    "circle",
+                ),
+            ],
+        },
+        Row {
+            class: "perfect",
+            features: [
+                Str(
+                    "color",
+                    "green",
+                ),
+                Str(
+                    "size",
+                    "medium",
+                ),
+                Str(
+                    "shape",
+                    "triangle",
+                ),
+            ],
+        },
+    ],
+    learning_neg: [
+        Row {
+            class: "bad",
+            features: [
+                Str(
+                    "color",
+                    "green",
+                ),
+                Str(
+                    "size",
+                    "medium",
+                ),
+                Str(
+                    "shape",
+                    "circle",
+                ),
+            ],
+        },
+        Row {
+            class: "good",
+            features: [
+                Str(
+                    "color",
+                    "red",
+                ),
+                Str(
+                    "size",
+                    "large",
+                ),
+                Str(
+                    "shape",
+                    "circle",
+                ),
+            ],
+        },
+        Row {
+            class: "good",
+            features: [
+                Str(
+                    "color",
+                    "red",
+                ),
+                Str(
+                    "size",
+                    "medium",
+                ),
+                Str(
+                    "shape",
+                    "circle",
+                ),
+            ],
+        },
+        Row {
+            class: "good",
+            features: [
+                Str(
+                    "color",
+                    "blue",
+                ),
+                Str(
+                    "size",
+                    "large",
+                ),
+                Str(
+                    "shape",
+                    "circle",
+                ),
+            ],
+        },
+        Row {
+            class: "good",
+            features: [
+                Str(
+                    "color",
+                    "blue",
+                ),
+                Str(
+                    "size",
+                    "large",
+                ),
+                Str(
+                    "shape",
+                    "triangle",
+                ),
+            ],
+        },
+        Row {
+            class: "good",
+            features: [
+                Str(
+                    "color",
+                    "red",
+                ),
+                Str(
+                    "size",
+                    "large",
+                ),
+                Str(
+                    "shape",
+                    "triangle",
+                ),
+            ],
+        },
+        Row {
+            class: "bad",
+            features: [
+                Str(
+                    "color",
+                    "green",
+                ),
+                Str(
+                    "size",
+                    "small",
+                ),
+                Str(
+                    "shape",
+                    "square",
+                ),
+            ],
+        },
+        Row {
+            class: "good",
+            features: [
+                Str(
+                    "color",
+                    "red",
+                ),
+                Str(
+                    "size",
+                    "medium",
+                ),
+                Str(
+                    "shape",
+                    "triangle",
+                ),
+            ],
+        },
+        Row {
+            class: "good",
+            features: [
+                Str(
+                    "color",
+                    "blue",
+                ),
+                Str(
+                    "size",
+                    "medium",
+                ),
+                Str(
+                    "shape",
+                    "circle",
+                ),
+            ],
+        },
+        Row {
+            class: "bad",
+            features: [
+                Str(
+                    "color",
+                    "green",
+                ),
+                Str(
+                    "size",
+                    "medium",
+                ),
+                Str(
+                    "shape",
+                    "square",
+                ),
+            ],
+        },
+        Row {
+            class: "bad",
+            features: [
+                Str(
+                    "color",
+                    "green",
+                ),
+                Str(
+                    "size",
+                    "large",
+                ),
+                Str(
+                    "shape",
+                    "square",
+                ),
+            ],
+        },
+        Row {
+            class: "bad",
+            features: [
+                Str(
+                    "color",
+                    "green",
+                ),
+                Str(
+                    "size",
+                    "large",
+                ),
+                Str(
+                    "shape",
+                    "circle",
+                ),
+            ],
+        },
+    ],
+    testing_pos: [
+        Row {
+            class: "perfect",
+            features: [
+                Str(
+                    "color",
+                    "blue",
+                ),
+                Str(
+                    "size",
+                    "small",
+                ),
+                Str(
+                    "shape",
+                    "square",
+                ),
+            ],
+        },
+        Row {
+            class: "perfect",
+            features: [
+                Str(
+                    "color",
+                    "blue",
+                ),
+                Str(
+                    "size",
+                    "small",
+                ),
+                Str(
+                    "shape",
+                    "triangle",
+                ),
+            ],
+        },
+        Row {
+            class: "perfect",
+            features: [
+                Str(
+                    "color",
+                    "green",
+                ),
+                Str(
+                    "size",
+                    "small",
+                ),
+                Str(
+                    "shape",
+                    "triangle",
+                ),
+            ],
+        },
+        Row {
+            class: "perfect",
+            features: [
+                Str(
+                    "color",
+                    "green",
+                ),
+                Str(
+                    "size",
+                    "large",
+                ),
+                Str(
+                    "shape",
+                    "triangle",
+                ),
+            ],
+        },
+    ],
+    testing_neg: [
+        Row {
+            class: "good",
+            features: [
+                Str(
+                    "color",
+                    "blue",
+                ),
+                Str(
+                    "size",
+                    "medium",
+                ),
+                Str(
+                    "shape",
+                    "triangle",
+                ),
+            ],
+        },
+        Row {
+            class: "bad",
+            features: [
+                Str(
+                    "color",
+                    "green",
+                ),
+                Str(
+                    "size",
+                    "small",
+                ),
+                Str(
+                    "shape",
+                    "circle",
+                ),
+            ],
+        },
+    ],
+}
