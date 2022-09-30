@@ -1,5 +1,4 @@
-use rand::Rng;
-
+use rand::{Rng, rngs::{StdRng}};
 // Build a dataset forma acsv file
 //
 // # Arguments
@@ -35,6 +34,7 @@ pub enum Op {
 
 impl Dataset {
     pub fn new(
+        mut rng: StdRng,
         path: &str,
         class_column: &str,
         positive_class: &str,
@@ -70,7 +70,6 @@ impl Dataset {
             all_records.push(row);
         }
 
-        let mut rng = rand::thread_rng();
         let frac = all_records.len() * learning_frac / 100;
         let (mut learning_pos, mut learning_neg, mut testing_pos, mut testing_neg) =
             (Vec::new(), Vec::new(), Vec::new(), Vec::new());
@@ -108,14 +107,22 @@ impl Dataset {
 mod tests {
     use super::*;
 
+    use rand::{rngs::{StdRng}, SeedableRng};
+
     #[test]
     fn test_new() {
-        let dataset = Dataset::new("datasets/test1.csv", "class", "yes", 80);
+        let rng = StdRng::seed_from_u64(1000);
+        let dataset = Dataset::new(rng, "datasets/test1.csv", "class", "yes", 80);
 
         let len = dataset.learning_pos.len()
             + dataset.learning_neg.len()
             + dataset.testing_pos.len()
             + dataset.testing_neg.len();
         assert_eq!(len, 9);
+
+        assert_eq!(dataset.learning_pos.len(), 3);
+        assert_eq!(dataset.learning_neg.len(), 4);
+        assert_eq!(dataset.testing_pos.len(), 1);
+        assert_eq!(dataset.testing_neg.len(), 1);
     }
 }

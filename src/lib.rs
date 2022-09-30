@@ -1,8 +1,12 @@
 pub mod models;
 
 use std::error::Error;
+use rand::SeedableRng;
+use rand::rngs::StdRng;
 
 use models::config::Config;
+
+const SEED: u64 = 1000;
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     match config {
@@ -15,7 +19,10 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
             println!("Learning fraction: {}", learning_frac);
             println!("Algorithm: {:?}", algorithm);
 
+            let rng = StdRng::seed_from_u64(SEED);
+
             let dataset = models::dataset::Dataset::new(
+                rng, 
                 &dataset,
                 &class_column,
                 &positive_class,
