@@ -1,10 +1,15 @@
 pub mod models;
 
-use std::error::Error;
-use rand::SeedableRng;
 use rand::rngs::StdRng;
+use rand::SeedableRng;
+use std::error::Error;
 
 use models::config::Config;
+
+use crate::models::rejectability::create_rejectability_graph;
+
+#[macro_use(c)]
+extern crate cute;
 
 const SEED: u64 = 1000;
 
@@ -21,8 +26,8 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 
             let rng = StdRng::seed_from_u64(SEED);
 
-            let dataset = models::dataset::Dataset::new(
-                rng, 
+            let dataset = models::data_handling::dataset::Dataset::new(
+                rng.clone(),
                 &dataset,
                 &class_column,
                 &positive_class,
@@ -33,7 +38,10 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
             println!("Learning negative len: {}", dataset.learning_neg.len());
             println!("Testing positive len: {}", dataset.testing_pos.len());
             println!("Testing negative len: {}", dataset.testing_neg.len());
-            println!("Dataset: {:?}", dataset);
+            println!("Dataset: {}", dataset);
+
+            let graph = create_rejectability_graph(rng, &dataset);
+            println!("Graph: {:?}", graph);
         }
     }
 

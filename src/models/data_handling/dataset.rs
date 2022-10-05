@@ -1,16 +1,8 @@
-use rand::{Rng, rngs::{StdRng}};
-// Build a dataset forma acsv file
-//
-// # Arguments
-//
-// * `path` - The path to the csv file
-// * `class_column` - The name of the column that contains the class
-// * `positive_class` - The name of the positive class
-// * `learning_frac` - The fraction of the dataset that will be used for learning
-//
-// # Returns
-//
-// A dataset
+use std::fmt;
+
+use rand::{rngs::StdRng, Rng};
+
+use super::{attribute_value::AttrValue, row::Row};
 
 #[derive(Debug)]
 pub struct Dataset {
@@ -20,16 +12,24 @@ pub struct Dataset {
     pub testing_neg: Vec<Row>,
 }
 
-#[derive(Debug)]
-pub struct Row {
-    pub class: String,
-    pub features: Vec<Op>,
-}
-
-#[derive(Debug)]
-pub enum Op {
-    Num(String, f64),
-    Str(String, String),
+impl fmt::Display for Dataset {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        writeln!(f, "Learning set:")?;
+        for row in &self.learning_pos {
+            writeln!(f, "  + {}", row)?;
+        }
+        for row in &self.learning_neg {
+            writeln!(f, "  - {}", row)?;
+        }
+        writeln!(f, "Testing set:")?;
+        for row in &self.testing_pos {
+            writeln!(f, "  + {}", row)?;
+        }
+        for row in &self.testing_neg {
+            writeln!(f, "  - {}", row)?;
+        }
+        write!(f, "")
+    }
 }
 
 impl Dataset {
@@ -53,17 +53,17 @@ impl Dataset {
 
             let mut row = Row {
                 class: class.clone(),
-                features: Vec::new(),
+                attributes: Vec::new(),
             };
 
             for (i, field) in record.iter().enumerate() {
                 if i != class_column_index {
-                    let feature = match field.parse::<f64>() {
-                        Ok(num) => Op::Num(headers[i].to_string(), num),
-                        Err(_) => Op::Str(headers[i].to_string(), field.to_string()),
+                    let attribute = match field.parse::<f64>() {
+                        Ok(num) => AttrValue::Num(headers[i].to_string(), num),
+                        Err(_) => AttrValue::Cat(headers[i].to_string(), field.to_string()),
                     };
 
-                    row.features.push(feature);
+                    row.attributes.push(attribute);
                 }
             }
 
@@ -107,7 +107,7 @@ impl Dataset {
 mod tests {
     use super::*;
 
-    use rand::{rngs::{StdRng}, SeedableRng};
+    use rand::{rngs::StdRng, SeedableRng};
 
     #[test]
     fn test_new() {
