@@ -1,14 +1,16 @@
 // Enum with the different options to run
 
-#[derive(Debug, PartialEq, Eq)]
+use super::ant_colony_optimization::aco_parameters::{ACOAlgorithm, ACOParameters};
+
+#[derive(Debug)]
 pub enum Config {
     Help(),
-    Run(String, String, String, usize, Algorithm),
+    Run(String, String, String, usize, Box<Algorithm>),
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug)]
 pub enum Algorithm {
-    Ants(usize, usize),
+    Ants(ACOAlgorithm, ACOParameters),
 }
 
 impl Config {
@@ -32,20 +34,33 @@ impl Config {
                 let algorithm = args[6][5..].to_string();
 
                 match algorithm.as_str() {
-                    "aco" => {
-                        if args.len() < 9 {
+                    "vertex-ac" | "edge-ac" => {
+                        if args.len() < 13 {
                             return Err("Not enough arguments");
                         }
 
                         let ants = args[7][5..].parse::<usize>().unwrap();
                         let gen = args[8][4..].parse::<usize>().unwrap();
+                        let alpha = args[9][6..].parse::<f64>().unwrap();
+                        let rho = args[10][4..].parse::<f64>().unwrap();
+                        let tau_max = args[11][8..].parse::<f64>().unwrap();
+                        let tau_min = args[12][8..].parse::<f64>().unwrap();
+
+                        let algo = Algorithm::Ants(
+                            if algorithm.as_str() == "vertex-ac" {
+                                ACOAlgorithm::VertexAC
+                            } else {
+                                ACOAlgorithm::EdgeAC
+                            },
+                            ACOParameters::new(gen, ants, alpha, rho, tau_max, tau_min),
+                        );
 
                         Ok(Config::Run(
                             dataset,
                             class_column,
                             positive_class,
                             learning_frac,
-                            Algorithm::Ants(ants, gen),
+                            Box::new(algo),
                         ))
                     }
                     _ => Err("Algorithm not found"),
@@ -53,41 +68,5 @@ impl Config {
             }
             _ => Err("Invalid argument"),
         }
-    }
-}
-
-// tests
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_new() {
-        assert_eq!(
-            Config::new(&vec!["".to_string(), "help".to_string()]).unwrap(),
-            Config::Help()
-        );
-        assert_eq!(
-            Config::new(&vec!["".to_string(), "-h".to_string()]).unwrap(),
-            Config::Help()
-        );
-        assert_eq!(
-            Config::new(&vec!["".to_string(), "--help".to_string()]).unwrap(),
-            Config::Help()
-        );
-
-        let args =
-            "oqat run ds=./test1.csv classname=class concept=yes learn%=80 algo=aco ants=10 gen=3";
-        let args: Vec<String> = args.split_whitespace().map(|s| s.to_string()).collect();
-        assert_eq!(
-            Config::new(&args[..]).unwrap(),
-            Config::Run(
-                "./test1.csv".to_string(),
-                "class".to_string(),
-                "yes".to_string(),
-                80,
-                Algorithm::Ants(10, 3)
-            )
-        );
     }
 }

@@ -48,7 +48,8 @@ pub fn create_rejectability_graph(rng: StdRng, dataset: &Dataset) -> Graph {
                 );
 
                 // add to the clause, the new selectors for this positive element
-                clause = update_clause(&clause, &singular_clause_two_neg_one_pos);
+                clause = clause.union(&singular_clause_two_neg_one_pos);
+                // clause = update_clause(&clause, &singular_clause_two_neg_one_pos);
 
                 exists_clause_for_all_positive =
                     exists_clause_for_all_positive && exists_clause_two_neg_on_pos;
@@ -56,50 +57,15 @@ pub fn create_rejectability_graph(rng: StdRng, dataset: &Dataset) -> Graph {
 
             if exists_clause_for_all_positive {
                 graph.add_edge(i, j, &clause);
-                println!(
-                    "There's an edge between {} and {}, with clause {}",
-                    i, j, clause
-                );
+                // println!(
+                //     "There's an edge between {} and {}, with clause {}",
+                //     i, j, clause
+                // );
             }
         }
     }
 
     graph
-}
-
-pub fn update_clause(
-    old_clause: &AttributeValuesSetList,
-    new_attributes: &AttributeValuesSetList,
-) -> AttributeValuesSetList {
-    let mut clause = old_clause.clone();
-    for attr_idx in 0..clause.list.len() {
-        match &clause.list[attr_idx] {
-            AttributeValuesSet::Num(attr_name, current_values_set) => {
-                if let AttributeValuesSet::Num(_, new_values_set) = &new_attributes.list[attr_idx] {
-                    let union_values_set: HashSet<OrderedFloat<f64>> =
-                        current_values_set.union(new_values_set).cloned().collect();
-                    clause.list[attr_idx] =
-                        AttributeValuesSet::Num(attr_name.clone(), union_values_set);
-                }
-            }
-            AttributeValuesSet::Cat(attr_name, current_values_set) => {
-                if let AttributeValuesSet::Cat(_, new_values_set) = &new_attributes.list[attr_idx] {
-                    let union_values_set: HashSet<String> =
-                        current_values_set.union(new_values_set).cloned().collect();
-                    clause.list[attr_idx] =
-                        AttributeValuesSet::Cat(attr_name.clone(), union_values_set);
-                }
-            }
-            AttributeValuesSet::Empty => {
-                let new_clause = new_attributes.list[attr_idx].clone();
-                if new_clause != AttributeValuesSet::Empty {
-                    clause.list[attr_idx] = new_clause;
-                }
-            }
-        }
-    }
-
-    clause
 }
 
 pub fn exists_clause_one_positive(

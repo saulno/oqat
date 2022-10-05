@@ -11,6 +11,7 @@ pub struct Graph {
     pub adj_mtx: Vec<Vec<Edge>>,
     pub edge_dict: HashMap<usize, HashSet<usize>>,
     pub n_vertex: usize,
+    pub available_vertex: HashSet<usize>,
     rng: StdRng,
 }
 
@@ -20,43 +21,76 @@ impl Graph {
             adj_mtx: vec![],
             edge_dict: HashMap::new(),
             n_vertex: 0,
+            available_vertex: HashSet::new(),
             rng,
         };
 
         graph.n_vertex = num_vertex;
-        graph.adj_mtx = vec![vec![Edge::No(); num_vertex]; num_vertex];
+        graph.adj_mtx = vec![vec![None; num_vertex]; num_vertex];
 
         for i in 0..num_vertex {
             graph.edge_dict.insert(i, HashSet::new());
+            graph.available_vertex.insert(i);
         }
 
         graph
     }
 
     pub fn add_edge(&mut self, u: usize, v: usize, clause_values: &AttributeValuesSetList) {
-        self.adj_mtx[u][v] = Edge::E(u, v, clause_values.clone());
-        self.adj_mtx[v][u] = Edge::E(v, u, clause_values.clone());
+        self.adj_mtx[u][v] = Some(clause_values.clone());
+        self.adj_mtx[v][u] = Some(clause_values.clone());
 
         self.edge_dict.get_mut(&u).unwrap().insert(v);
         self.edge_dict.get_mut(&v).unwrap().insert(u);
     }
 
     pub fn is_edge(&self, vertex_1: usize, vertex_2: usize) -> bool {
-        match self.adj_mtx[vertex_1][vertex_2] {
-            Edge::No() => false,
-            Edge::E(_, _, _) => true,
-        }
+        // match self.adj_mtx[vertex_1][vertex_2] {
+        //     Edge::No() => false,
+        //     Edge::E(_, _, _) => true,
+        // }
+        self.adj_mtx[vertex_1][vertex_2].is_some()
     }
 
     pub fn select_random_vertex(&mut self) -> usize {
-        self.rng.gen_range(0..self.n_vertex)
+        loop {
+            let selected = self.rng.gen_range(0..self.n_vertex);
+            if self.available_vertex.contains(&selected) {
+                return selected;
+            }
+        }
     }
 
     pub fn get_neighbor_candidates(&self, vertex: usize) -> HashSet<usize> {
-        if let Some(set) = self.edge_dict.get(&vertex) {
-            set.clone()
-        } else {
-            HashSet::new()
+        let all_neighbors = self.edge_dict.get(&vertex).unwrap();
+        let available_neighbors = all_neighbors.intersection(&self.available_vertex);
+        available_neighbors.copied().collect()
+    }
+
+    pub fn remove_vertex_set_from_available(&mut self, vertex_set: &HashSet<usize>) {
+        self.available_vertex = self
+            .available_vertex
+            .difference(vertex_set)
+            .copied()
+            .collect();
+    }
+
+    pub fn get_clique_clause(&self, clique: HashSet<usize>) -> AttributeValuesSetList {
+        let mut clique_clause = AttributeValuesSetList::new();
+
+        let vertex_list = clique.iter().copied().collect::<Vec<usize>>();
+        for i in 0..vertex_list.len() {
+            for j in i + 1..vertex_list.len() {
+                let (v1, v2): (usize, usize) = (vertex_list[i], vertex_list[j]);
+                let edge_clause = self.adj_mtx[v1][v2].as_ref().unwrap();
+                clique_clause = if clique_clause.list.is_empty() {
+                    edge_clause.clone()
+                } else {
+                    clique_clause.intersection(edge_clause)
+                };
+            }
         }
+
+        clique_clause
     }
 }
