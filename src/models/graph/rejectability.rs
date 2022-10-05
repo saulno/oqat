@@ -3,13 +3,13 @@ use rand::rngs::StdRng;
 use std::collections::HashSet;
 
 use super::{
-    data_handling::{
+    super::data_handling::{
         attribute_value::AttrValue,
         attribute_values_set::{AttributeValuesSet, AttributeValuesSetList},
         dataset::Dataset,
         row::Row,
     },
-    graph::Graph,
+    rejectability_graph::Graph,
 };
 
 // create rejectability graph
@@ -67,7 +67,7 @@ pub fn create_rejectability_graph(rng: StdRng, dataset: &Dataset) -> Graph {
     graph
 }
 
-fn update_clause(
+pub fn update_clause(
     old_clause: &AttributeValuesSetList,
     new_attributes: &AttributeValuesSetList,
 ) -> AttributeValuesSetList {
@@ -102,7 +102,7 @@ fn update_clause(
     clause
 }
 
-fn exists_clause_one_positive(
+pub fn exists_clause_one_positive(
     positive: &Row,
     negative_pair_attrs: &AttributeValuesSetList,
 ) -> bool {
@@ -128,7 +128,7 @@ fn exists_clause_one_positive(
     exists_clause
 }
 
-fn find_clause_one_positive(
+pub fn find_clause_one_positive(
     positive_dataset: &[Row],
     positive_idx: usize,
     negative_pair_attrs: &AttributeValuesSetList,
@@ -168,7 +168,7 @@ fn find_clause_one_positive(
 }
 
 // construct a list of sets containig the values of every atrribute for each element in a subest of the dataset
-fn construct_attribute_sets(dataset: &[Row], subset: &[usize]) -> AttributeValuesSetList {
+pub fn construct_attribute_sets(dataset: &[Row], subset: &[usize]) -> AttributeValuesSetList {
     let subset_elements = subset
         .iter()
         .map(|&i| dataset[i].attributes.clone())
@@ -201,75 +201,4 @@ fn construct_attribute_sets(dataset: &[Row], subset: &[usize]) -> AttributeValue
     }
 
     values
-}
-
-// tests
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    use rand::{rngs::StdRng, SeedableRng};
-
-    #[test]
-    fn test_create_rejectability_graph() {
-        let rng = StdRng::seed_from_u64(1000);
-        let dataset = Dataset::new(rng, "datasets/test1.csv", "class", "yes", 80);
-
-        let rng = StdRng::seed_from_u64(1000);
-        let graph = create_rejectability_graph(rng, &dataset);
-
-        assert_eq!(graph.n_vertex, 4);
-    }
-
-    #[test]
-    fn test_construct_attribute_sets() {
-        let rng = StdRng::seed_from_u64(1000);
-        let dataset = Dataset::new(rng, "datasets/test1.csv", "class", "yes", 80);
-
-        assert_eq!(dataset.learning_neg.len(), 4);
-        let subset = [0, 1, 2];
-        let values = construct_attribute_sets(&dataset.learning_neg, &subset);
-
-        assert_eq!(values.list.len(), 2);
-
-        let mut hs: HashSet<String> = HashSet::new();
-        hs.insert("small".to_string());
-        hs.insert("large".to_string());
-        hs.insert("medium".to_string());
-        assert_eq!(
-            values.list[0],
-            AttributeValuesSet::Cat("size".to_string(), hs)
-        );
-
-        let mut hs: HashSet<String> = HashSet::new();
-        hs.insert("green".to_string());
-        hs.insert("red".to_string());
-        assert_eq!(
-            values.list[1],
-            AttributeValuesSet::Cat("color".to_string(), hs)
-        );
-    }
-
-    #[test]
-    fn test_exists_clause_one_positive() {
-        let rng = StdRng::seed_from_u64(1000);
-        let dataset = Dataset::new(rng, "datasets/test1.csv", "class", "yes", 80);
-
-        let positive_idx = 0;
-
-        let negative_pair_attrs = construct_attribute_sets(&dataset.learning_neg, &[0, 1]);
-        let exists_clause = exists_clause_one_positive(
-            &dataset.learning_pos[positive_idx],
-            &negative_pair_attrs
-        );
-        assert_eq!(exists_clause, true);
-        
-        let negative_pair_attrs = construct_attribute_sets(&dataset.learning_neg, &[1, 2]);
-        let exists_clause = exists_clause_one_positive(
-            &dataset.learning_pos[positive_idx],
-            &negative_pair_attrs
-        );
-        assert_eq!(exists_clause, false);
-
-    }
 }

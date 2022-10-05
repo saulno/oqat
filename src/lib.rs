@@ -6,7 +6,7 @@ use std::error::Error;
 
 use models::config::Config;
 
-use crate::models::rejectability::create_rejectability_graph;
+use crate::models::graph::rejectability::create_rejectability_graph;
 
 #[macro_use(c)]
 extern crate cute;
