@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet};
 
 use rand::{rngs::StdRng, Rng};
 
-use crate::models::data_handling::attribute_values_set::AttributeValuesSetList;
+use crate::models::data_handling::{attribute_values_set::AttributeValuesSetList, row::Row};
 
 use super::edge::Edge;
 
@@ -12,16 +12,25 @@ pub struct Graph {
     pub edge_dict: HashMap<usize, HashSet<usize>>,
     pub n_vertex: usize,
     pub available_vertex: HashSet<usize>,
+    pub reject_one_negative: Vec<AttributeValuesSetList>,
+    pub positive_dataset: Vec<Row>,
     rng: StdRng,
 }
 
 impl Graph {
-    pub fn new(rng: StdRng, num_vertex: usize) -> Graph {
+    pub fn new(
+        rng: StdRng,
+        num_vertex: usize,
+        reject_one_negative: Vec<AttributeValuesSetList>,
+        positive_dataset: Vec<Row>,
+    ) -> Graph {
         let mut graph = Graph {
             adj_mtx: vec![],
             edge_dict: HashMap::new(),
             n_vertex: 0,
             available_vertex: HashSet::new(),
+            reject_one_negative,
+            positive_dataset,
             rng,
         };
 
@@ -77,6 +86,11 @@ impl Graph {
 
     pub fn get_clique_clause(&self, clique: HashSet<usize>) -> AttributeValuesSetList {
         let mut clique_clause = AttributeValuesSetList::new();
+
+        if clique.len() == 1 {
+            let vertex = clique.iter().next().unwrap();
+            return self.reject_one_negative[*vertex].clone();
+        }
 
         let vertex_list = clique.iter().copied().collect::<Vec<usize>>();
         for i in 0..vertex_list.len() {

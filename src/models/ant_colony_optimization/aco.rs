@@ -110,12 +110,19 @@ pub trait ACO {
                         &candidates,
                         &k_clique,
                     );
-                    let new_v_candidates = p.graph.get_neighbor_candidates(new_v);
-                    k_clique.insert(new_v);
-                    candidates = candidates
-                        .intersection(&new_v_candidates)
-                        .copied()
-                        .collect();
+                    let new_v_is_semantically_valid =
+                        self.candidate_is_semantically_valid(&p, &new_v, &k_clique);
+                    if new_v_is_semantically_valid {
+                        // println!("new_v: {}, current_clique: {:?}", new_v, &k_clique);
+                        let new_v_candidates = p.graph.get_neighbor_candidates(new_v);
+                        k_clique.insert(new_v);
+                        candidates = candidates
+                            .intersection(&new_v_candidates)
+                            .copied()
+                            .collect();
+                    } else {
+                        candidates.remove(&new_v);
+                    }
                 }
 
                 gen_best = Self::choose_best_clique(p, &gen_best, &k_clique);
@@ -128,6 +135,39 @@ pub trait ACO {
         }
 
         global_best
+    }
+
+    fn candidate_is_semantically_valid(
+        &self,
+        p: &ACOParameters,
+        candidate: &usize,
+        current_clique: &HashSet<usize>,
+    ) -> bool {
+        let mut is_valid: bool = true;
+
+        // check if new cliques clause is complete
+        let mut new_clique = current_clique.clone();
+        new_clique.insert(*candidate);
+        let new_clique_clause = p.graph.get_clique_clause(new_clique);
+        // loop every positive element
+        // println!("Trying to add {} to {:?} -> {}", candidate, current_clique, &new_clique_clause);
+        for positive in &p.graph.positive_dataset {
+            let mut is_valid_one_positive = false;
+            let intersect = new_clique_clause.intersection(&positive.attributes);
+            // println!("  - Positive: {} -> {}", positive, &intersect);
+            for i in intersect.list {
+                is_valid_one_positive = is_valid_one_positive || !i.is_empty();
+                // println!("    - {} {} -> {}", is_valid_one_positive, i, !i.is_empty());
+            }
+
+            is_valid = is_valid && is_valid_one_positive;
+        }
+        // println!(
+        //     "Tryed to add {} to {:?} -> {} {}",
+        //     candidate, current_clique, &new_clique_clause, is_valid
+        // );
+
+        is_valid
     }
 
     fn choose_best_clique(

@@ -46,6 +46,11 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 
             let graph = create_rejectability_graph(rng.clone(), &dataset);
 
+            println!(
+                "Rejectability graph created. Number of nodes: {}",
+                graph.n_vertex
+            );
+
             match *algorithm {
                 models::config::Algorithm::Ants(aco_algo, mut aco_parameters) => {
                     aco_parameters.graph = graph;

@@ -1,19 +1,16 @@
 use std::fmt;
 
-use super::attribute_value::AttrValue;
+use super::{attribute_value::AttrValue, attribute_values_set::AttributeValuesSetList};
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Row {
     pub class: String,
-    pub attributes: Vec<AttrValue>,
+    pub attributes: AttributeValuesSetList,
 }
 
 impl fmt::Display for Row {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}: ", self.class)?;
-        for attr in &self.attributes {
-            write!(f, "{}, ", attr)?;
-        }
+        write!(f, "{}: {}", self.class, self.attributes)?;
         Ok(())
     }
 }

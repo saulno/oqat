@@ -1,8 +1,12 @@
-use std::fmt;
+use std::{collections::HashSet, fmt};
 
+use ordered_float::OrderedFloat;
 use rand::{rngs::StdRng, Rng};
 
-use super::{attribute_value::AttrValue, row::Row};
+use super::{
+    attribute_values_set::{AttributeValuesSet, AttributeValuesSetList},
+    row::Row,
+};
 
 #[derive(Debug)]
 pub struct Dataset {
@@ -15,18 +19,18 @@ pub struct Dataset {
 impl fmt::Display for Dataset {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         writeln!(f, "Learning set:")?;
-        for row in &self.learning_pos {
-            writeln!(f, "  + {}", row)?;
+        for (idx, row) in self.learning_pos.iter().enumerate() {
+            writeln!(f, "  +{} {}", idx, row)?;
         }
-        for row in &self.learning_neg {
-            writeln!(f, "  - {}", row)?;
+        for (idx, row) in self.learning_neg.iter().enumerate() {
+            writeln!(f, "  -{} {}", idx, row)?;
         }
         writeln!(f, "Testing set:")?;
-        for row in &self.testing_pos {
-            writeln!(f, "  + {}", row)?;
+        for (idx, row) in self.testing_pos.iter().enumerate() {
+            writeln!(f, "  +{} {}", idx, row)?;
         }
-        for row in &self.testing_neg {
-            writeln!(f, "  - {}", row)?;
+        for (idx, row) in self.testing_neg.iter().enumerate() {
+            writeln!(f, "  -{} {}", idx, row)?;
         }
         write!(f, "")
     }
@@ -53,17 +57,23 @@ impl Dataset {
 
             let mut row = Row {
                 class: class.clone(),
-                attributes: Vec::new(),
+                attributes: AttributeValuesSetList::new(),
             };
 
             for (i, field) in record.iter().enumerate() {
                 if i != class_column_index {
                     let attribute = match field.parse::<f64>() {
-                        Ok(num) => AttrValue::Num(headers[i].to_string(), num),
-                        Err(_) => AttrValue::Cat(headers[i].to_string(), field.to_string()),
+                        Ok(num) => AttributeValuesSet::Num(
+                            headers[i].to_string(),
+                            HashSet::from([OrderedFloat(num)]),
+                        ),
+                        Err(_) => AttributeValuesSet::Cat(
+                            headers[i].to_string(),
+                            HashSet::from([field.to_string()]),
+                        ),
                     };
 
-                    row.attributes.push(attribute);
+                    row.attributes.list.push(attribute);
                 }
             }
 
@@ -100,4 +110,20 @@ impl Dataset {
             testing_neg,
         }
     }
+
+    // pub fn get_clause_one_learning_negative(&self, idx: usize) -> AttributeValuesSetList {
+    //     let mut result = AttributeValuesSetList::new();
+
+    //     for attr_idx in 0..self.learning_neg[idx].attributes.len() {
+    //         let mut values = Vec::new();
+
+    //         for row in &self.learning_neg {
+    //             values.push(row.attributes[attr_idx].clone());
+    //         }
+
+    //         result.list.push(AttributeValuesSetList::from_vec(values));
+    //     }
+
+    //     result
+    // }
 }

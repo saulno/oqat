@@ -1,6 +1,8 @@
 use rand::{rngs::StdRng, SeedableRng};
 
-use crate::models::graph::rejectability_graph::Graph;
+use crate::models::{
+    data_handling::attribute_values_set::AttributeValuesSetList, graph::rejectability_graph::Graph,
+};
 
 #[derive(Debug)]
 pub struct ACOParameters {
@@ -31,7 +33,7 @@ impl ACOParameters {
     ) -> ACOParameters {
         let rng = StdRng::seed_from_u64(1000);
         ACOParameters {
-            graph: Graph::new(rng.clone(), 0),
+            graph: Graph::new(rng.clone(), 0, vec![], vec![]),
             rand: rng,
             cycles,
             ants,

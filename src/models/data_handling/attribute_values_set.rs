@@ -32,6 +32,20 @@ impl fmt::Display for AttributeValuesSet {
     }
 }
 
+impl AttributeValuesSet {
+    pub fn new() -> AttributeValuesSet {
+        AttributeValuesSet::Empty
+    }
+
+    pub fn is_empty(&self) -> bool {
+        match self {
+            AttributeValuesSet::Num(_, set) => set.is_empty(),
+            AttributeValuesSet::Cat(_, set) => set.is_empty(),
+            AttributeValuesSet::Empty => true,
+        }
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct AttributeValuesSetList {
     pub list: Vec<AttributeValuesSet>,
@@ -112,6 +126,39 @@ impl AttributeValuesSetList {
                             .collect();
                         result.list[attr_idx] =
                             AttributeValuesSet::Cat(attr_name.clone(), intersection_values_set);
+                    }
+                }
+                AttributeValuesSet::Empty => {
+                    result.list[attr_idx] = other.list[attr_idx].clone();
+                }
+            }
+        }
+
+        result
+    }
+
+    pub fn difference(&self, other: &AttributeValuesSetList) -> AttributeValuesSetList {
+        let mut result = self.clone();
+        for attr_idx in 0..result.list.len() {
+            match &result.list[attr_idx] {
+                AttributeValuesSet::Num(attr_name, current_values_set) => {
+                    if let AttributeValuesSet::Num(_, new_values_set) = &other.list[attr_idx] {
+                        let difference_values_set: HashSet<OrderedFloat<f64>> = current_values_set
+                            .difference(new_values_set)
+                            .cloned()
+                            .collect();
+                        result.list[attr_idx] =
+                            AttributeValuesSet::Num(attr_name.clone(), difference_values_set);
+                    }
+                }
+                AttributeValuesSet::Cat(attr_name, current_values_set) => {
+                    if let AttributeValuesSet::Cat(_, new_values_set) = &other.list[attr_idx] {
+                        let difference_values_set: HashSet<String> = current_values_set
+                            .difference(new_values_set)
+                            .cloned()
+                            .collect();
+                        result.list[attr_idx] =
+                            AttributeValuesSet::Cat(attr_name.clone(), difference_values_set);
                     }
                 }
                 AttributeValuesSet::Empty => {

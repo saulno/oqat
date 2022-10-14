@@ -4,7 +4,6 @@ use std::collections::HashSet;
 
 use super::{
     super::data_handling::{
-        attribute_value::AttrValue,
         attribute_values_set::{AttributeValuesSet, AttributeValuesSetList},
         dataset::Dataset,
         row::Row,
@@ -14,9 +13,29 @@ use super::{
 
 // create rejectability graph
 pub fn create_rejectability_graph(rng: StdRng, dataset: &Dataset) -> Graph {
-    let mut graph = Graph::new(rng, dataset.learning_neg.len());
+    // create a complete clause (accepts all posotive)
+    let accept_all_positive = construct_attribute_sets(
+        &dataset.learning_pos,
+        &c![i, for i in 0..dataset.learning_pos.len()],
+    );
+    // for every negative element, create a clause that rejects only that element
+    let mut reject_only_one_negative: Vec<AttributeValuesSetList> = vec![];
+    for neg in &dataset.learning_neg {
+        let mut one_neg_clause = accept_all_positive.clone();
+        one_neg_clause = one_neg_clause.difference(&neg.attributes);
+        reject_only_one_negative.push(one_neg_clause);
+    }
 
-    // add an edge for every ossible pair of negative examples
+    println!("complete clause {}", accept_all_positive);
+
+    let mut graph = Graph::new(
+        rng,
+        dataset.learning_neg.len(),
+        reject_only_one_negative,
+        dataset.learning_pos.clone(),
+    );
+
+    // add an edge for every possible pair of negative examples
     for i in 0..dataset.learning_neg.len() {
         for j in i + 1..dataset.learning_neg.len() {
             // get a list of sets with every selector of the two negative examples
@@ -57,10 +76,10 @@ pub fn create_rejectability_graph(rng: StdRng, dataset: &Dataset) -> Graph {
 
             if exists_clause_for_all_positive {
                 graph.add_edge(i, j, &clause);
-                // println!(
-                //     "There's an edge between {} and {}, with clause {}",
-                //     i, j, clause
-                // );
+                println!(
+                    "There's an edge between {} and {}, with clause {}",
+                    i, j, clause
+                );
             }
         }
     }
@@ -74,17 +93,18 @@ pub fn exists_clause_one_positive(
 ) -> bool {
     let mut exists_clause = false;
 
-    for (pos_attr_idx, pos_attr) in positive.attributes.iter().enumerate() {
+    for (pos_attr_idx, pos_attr_set) in positive.attributes.list.iter().enumerate() {
         match &negative_pair_attrs.list[pos_attr_idx] {
             AttributeValuesSet::Num(_, neg_values_set) => {
-                if let AttrValue::Num(_, pos_value) = pos_attr {
-                    exists_clause =
-                        exists_clause || !neg_values_set.contains(&OrderedFloat(*pos_value));
+                if let AttributeValuesSet::Num(_, pos_value_set) = pos_attr_set {
+                    let first_val_pos = pos_value_set.iter().next().unwrap();
+                    exists_clause = exists_clause || !neg_values_set.contains(&first_val_pos);
                 }
             }
             AttributeValuesSet::Cat(_, neg_values_set) => {
-                if let AttrValue::Cat(_, pos_value) = pos_attr {
-                    exists_clause = exists_clause || !neg_values_set.contains(pos_value);
+                if let AttributeValuesSet::Cat(_, pos_value_set) = pos_attr_set {
+                    let first_val_pos = pos_value_set.iter().next().unwrap();
+                    exists_clause = exists_clause || !neg_values_set.contains(first_val_pos);
                 }
             }
             AttributeValuesSet::Empty => continue,
@@ -140,30 +160,10 @@ pub fn construct_attribute_sets(dataset: &[Row], subset: &[usize]) -> AttributeV
         .map(|&i| dataset[i].attributes.clone())
         .collect::<Vec<_>>();
 
-    let values: Vec<AttributeValuesSet> = subset_elements[0]
-        .iter()
-        .map(|attr| match attr {
-            AttrValue::Num(name, _) => AttributeValuesSet::Num(name.clone(), HashSet::new()),
-            AttrValue::Cat(name, _) => AttributeValuesSet::Cat(name.clone(), HashSet::new()),
-        })
-        .collect();
-    let mut values: AttributeValuesSetList = AttributeValuesSetList { list: values };
+    let mut values: AttributeValuesSetList = subset_elements[0].clone();
 
-    for elem in subset_elements {
-        for (idx, attr) in elem.iter().enumerate() {
-            match attr {
-                AttrValue::Num(_, value) => {
-                    if let AttributeValuesSet::Num(_, set) = &mut values.list[idx] {
-                        set.insert(OrderedFloat(*value));
-                    }
-                }
-                AttrValue::Cat(_, value) => {
-                    if let AttributeValuesSet::Cat(_, set) = &mut values.list[idx] {
-                        set.insert(value.clone());
-                    }
-                }
-            }
-        }
+    for elem_set in subset_elements {
+        values = values.union(&elem_set);
     }
 
     values

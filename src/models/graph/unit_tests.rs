@@ -22,7 +22,7 @@ mod tests {
     #[test]
     fn test_graph_new() {
         let rng = StdRng::seed_from_u64(1000);
-        let mut graph = Graph::new(rng, 5);
+        let mut graph = Graph::new(rng, 5, vec![], vec![]);
 
         let clause_values = AttributeValuesSetList {
             list: vec![
@@ -59,7 +59,7 @@ mod tests {
     #[test]
     fn test_graph_select_random_vertex() {
         let rng = StdRng::seed_from_u64(1000);
-        let mut graph = Graph::new(rng, 5);
+        let mut graph = Graph::new(rng, 5, vec![], vec![]);
 
         let mut random_vertex = graph.select_random_vertex();
         let options = HashSet::from([0, 1, 2, 3, 4]);
@@ -75,7 +75,7 @@ mod tests {
     #[test]
     fn test_graph_get_neighbor_candidates() {
         let rng = StdRng::seed_from_u64(1000);
-        let mut graph = Graph::new(rng, 5);
+        let mut graph = Graph::new(rng, 5, vec![], vec![]);
 
         let clause_values = AttributeValuesSetList {
             list: vec![
